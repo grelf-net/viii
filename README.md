@@ -1,7 +1,7 @@
 # viii
 Game: Pieces of 8
 
-Pieces of Eight is a game inspired by the July 2024 "Random Generation" game jam on itch run by Portland Indie Game Squad (PIGS). Inspiration also came from reading the Wikipedia article about Pieces of Eight.
+Pieces of Eight (https://grelf.itch.io/viii) is a game inspired by the July 2024 "Random Generation" game jam on itch run by Portland Indie Game Squad (PIGS). Inspiration also came from reading the Wikipedia article about Pieces of Eight.
 
 It is a kind of open world RPG: the terrain is limitless, with dungeons everywhere, and roles come into it. Some things only work if you are in an appropriate role.
 
