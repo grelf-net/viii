@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Pieces of Eight Help</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {font-family:sans-serif;font-size:medium;padding:0;margin:8px;background:#fff;color:#000}
+#ims {float:left;width:310px;margin-right:16px}
+</style>
+</head>
+<body>
+<div id="ims">
+<img src="helpim/XMap_300x225.png" width="300" height="225" alt="Map of the initial area"/>
+<img src="helpim/Show_300x130.png" width="300" height="130" alt="Buttons to go between map and scene"/>
+<img src="helpim/XScene_300x225.png" width="300" height="225" alt="A ground scene showing a mineshaft"/>
+<img src="helpim/Forward_300x134.png" width="300" height="134" alt="Forward  button, into mine or up ladder"/>
+<img src="helpim/XMine_300x225.png" width="300" height="225" alt="A scene in the mines"/>
+<img src="helpim/ShowM_300x130.png" width="300" height="130" alt="Buttons to go between map and scene"/>
+<img src="helpim/XMineMap_300x225.png" width="300" height="225" alt="Map of part of the mines"/>
+<img src="helpim/Pieces_300x225.png" width="300" height="225" style="margin-top:50px" alt="Another scene"/>
+</div>
+<div id="txt">
+<h1>Help for &quot;Pieces of Eight&quot; (grelf.itch.io/viii)</h1>
+<p>You will start on an island. You will see your position on a map. 
+Your island may be small or it may be very large. The map is limitless and you are free to 
+explore. Your aim is to collect certain objects, the nature and quantity of which you might guess 
+from the title.</p>
+<p>The map will be different every time you start the game because it is randomly generated. 
+However, if you like a particular map there are buttons for saving and reloading games.</p>
+<p>If you need to go between islands you may be able to find a helicopter to enter and fly. There 
+are sometimes underground links between islands. There are other ways to do it too.</p>
+<p>There are useful things to be found underground and inside buildings. You will need them.</p>
+<p>The graphical display can show either a map or a scene. The map contains, initially in the centre,
+a red circle with a point. This indicates where you are standing and the direction you are facing 
+when you switch from the map to a scene. The dashed red circle around your map position indicates 
+how far you can see, fog and other objects permitting. 
+<strong>Map scale:</strong> the black north lines are 300m (metres) apart.</p>
+<img src="im/symMe_36x36.png" width="36" height="36" alt="Position symbol"/>
+<p>The program may be controlled either by clicking on buttons displayed in the page or, if you have 
+a keyboard, by pressing keys. Each button indicates the related key. In some cases if you hover over 
+a button you will see that there are alternative keys which may be more convenient to use.</p>
+<p>The buttons and keys available will change depending on the visible content of the main graphical 
+display area.</p>
+<p>Generally you can move the map or move your viewpoint around in a scene by using the lower row of 
+buttons or arrow keys. Using keys is faster.</p>
+<img src="helpim/Moves_410x77.png" width="410" height="77" alt="Buttons for moving around in a scene"/>
+<h2>Roles</h2>
+<p>At the left below the title there is a drop-down for changing your role. There are 
+several possibilities. <strong>Explorer</strong> is your role at the start. Be aware that you 
+can fall down mineshafts in this role but that is how to enter the underground mines.</p>
+<p>Certain things can only happen if you are in suitable role. You may need to think about it.</p>
+<h2>Some special buttons/keys</h2>
+<p>These buttons may appear, depending on which graphical display is showing (map, ground, mine, 
+etc).</p>
+<ul>
+<li><strong>Found (key f)</strong> shows the objects you have collected so far.</li>
+<li><strong>Enter (&#x21a9;)</strong> As it implies, this key can be used to enter certain things 
+when you are close enough to them. For example, enter a helicopter in which case it will fly up 10 
+metres to give a view from that height. You can enter buildings and you will need to do so, to 
+find information about your goal. There are some machines inside buildings too.</li>
+<li><strong>Auto (u)</strong> In a ground or aerial scene this will set your viewpoint moving forward 
+repeatedly until either an obstacle is met or you press another button/key. This is useful if you
+have found a helicopter, for flying rapidly.</li>
+<li>In certain roles you may see other buttons.</li>
+<li>There are also buttons for saving games and reloading them. The data are kept in your browser, 
+as long as you have not set the browser to delete data on exit.</li>
+</ul>
+<p><em>There is much more to discover but these hints should get you started. Do take note of the 
+map symbols box and the things you can adjust in the settings box.</em></p>
+<h2>Some background information</h2>
+<p>This game was partly inspired by a 
+<a href="https://en.wikipedia.org/wiki/Spanish_dollar" target="_blank">Wikipedia article</a> 
+and also by the <a href="https://itch.io/jam/ssjrandomgeneration" target="_blank">July 2024 game jam</a> 
+run by the Portland Indie Game Squad.</p>
+<p>The limitless terrain is generated in real time as you explore it. It is programmed in plain old 
+JavaScript (JS) to run in any graphical browser. It is all my own code without using any other 
+libraries or frameworks. 
+Graphical images are all from my own photos, processed in Affinity Photo to make PNG files having 
+transparent surrounds. These are displayed in a simple 2D canvas element using my own perspective 
+algorithm.</p>
+<p>The terrain generator differs very little from its earliest version around 1982 when I wrote it 
+in Z80 assembler to run in a TRS-80 having only 16 kilobytes(!) of programmable memory. In those 
+days generating detailed terrain like this was perfectly possible in just a few kilobytes but it was 
+not possible to display it in detail, either as a map or a scene.</p>
+<p>My main interest was in simulating the sport of orienteering, particularly to help people 
+understand contours for navigation. That was possible back in 1982 if the terrain was 
+&quot;surveyed&quot; (laboriously) so that detailed maps could be printed to accompany the 
+published game. That is why the maps you see in the current version are drawn to orienteering 
+standards. Runnable woodland, the best terrain for the sport, is white on the map.</p>
+<p>Reviews of my earliest versions can be found 
+<a href="https://pixelatron.com/blog/explorer-an-exploration-game-from-before-there-were-exploration-games/" 
+target="_blank">here (Pixelatron)<a> and 
+<a href="https://www.crashonline.org.uk/01/forest.htm" target="_blank">here (Crash magazine)</a>.</p>
+<p>In 2014 I started to rewrite the code in JS and discovered that browsers made it possible to 
+display detailed graphics in a reasonable time and of course they continue to get more efficient. 
+My code is object-oriented but in the original prototype style of JS.</p>
+<p>If you go to my itch version of 
+<a href="https://grelf.itch.io/forest" target="_blank">The Forest</a> (from which the 
+current program is derived) you will find further documents, including a PDF file about how the 
+terrain is generated.</p>
+</div>
+</body>
+</html>

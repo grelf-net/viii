@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- By Graham Relf. Sources made available for programmers to experiment with the ideas
+and improve on them. A link back to https://grelf.net would be appreciated. -->
+<head>
+<meta charset="utf-8">
+<meta name="application-name" content="Pieces of Eight">
+<meta name="author" content="Graham Relf">
+<meta name="description" content="A never-ending detailed map to explore and find certain objects. Designed to encourage pure HTML5/JavaScript creativity.">
+<meta name="keywords" content="terrain,simulation,exploration,map,contours,geography,treasure,HTML5,JavaScript">
+<title>Pieces of Eight</title>
+<style>
+body {font-family:sans-serif;font-size:small;padding:0;margin:8px;background:#fff;color:#000}
+#main {width:890px;float:left;}
+#mainLeft {width:800px;height:695px;float:left;}
+#mainFoot {width:800px;padding:4px;float:left;}
+#canvas {width:800px;height:600px;}
+#belowCanvas {width:800px;height:110px;}
+#titleAndRole {font-size:larger;font-weight:bold;float:left;width:235px;}
+#title {color:#fff;background:#090;height:20px;padding:2px 8px;font-size:larger;font-weight:bold;}
+#roleDiv {margin-top:4px}
+#belowButtons {float:left;}
+#sideButtons {float:left;height:670px;}
+#side {float:left;margin-left:4px;visibility:hidden}
+#extraButtons {width:220px;margin:4px;}
+#symbols {border:2px solid #0bb14d;margin:4px;}
+#settings {border:2px solid #0bb14d;margin:4px;}
+#sethead,#symhead {background:#0bb14d;color:#fff;margin:0;text-align:center;font-weight:bold}
+#setcontent,#symcontent {padding:4px}
+#heli {background:#ccf;}
+#mapclick {position:fixed;left:10px;top:10px;width:170px;background:#eee;visibility:hidden}
+#divtitle {margin:0;padding:8px;font-weight:bold;background:#393;color:#fff}
+#divbody {padding:8px}
+#draggable {font-size:smaller;font-weight:normal;float:right}
+.clear {clear:both;}
+.button {text-align:center;font-weight:bold;padding:16px;background:#ccc;border-top:4px solid #eee;border-left:4px solid #ddd;border-right:4px solid #888; border-bottom:4px solid #555;}
+#extraButtons .button {float:left;height:50px;width:30px}
+.belowButton {width:100px;height:56px;float:left;}
+.smallButton {width:30px;height:40px;float:left;}
+.sideButton {width:50px;height:90px;clear:both;}
+.swatch {padding:2px 8px;width:54px;margin:2px;text-align:center}
+</style>
+</head>
+<body onload="run()">
+  <div id="mapclick"></div>
+<div id="main">
+    <div id="mainLeft">
+        <div id="canvas">
+<canvas id="map" width="800" height="600" tabindex="1">
+The HTML5 canvas element is not recognised by this browser.<br/>
+</canvas>
+        </div>
+        <div id="belowCanvas">
+            <div id="titleAndRole"><span id="title">Pieces of Eight v24.7.15</span>
+<div id="roleDiv">Role:
+<select id="role" onchange="changeRole()" tabindex="-1">
+<option value="E" selected>Explorer</option>
+<option value="A">Archaeologist</option>
+<option value="L">Locksmith</option>
+<option value="G">Engineer</option>
+<option value="M">Magician</option>
+<option value="P">Parachutist</option>
+<option value="R">Gangster</option>
+<option value="I">Pilot</option>
+</select>
+</div>
+            </div>
+            <div id="belowButtons"><br>You don't pick a role yet. Just note the choices that will be available</div>
+        </div>
+    </div>
+    <div id="sideButtons"></div>
+  <div id="mainFoot">
+    <div id="info"></div>
+    <div id="results"></div>
+    <p id="footer">This game does not use cookies. Games are only saved locally in your browser</p> 
+  </div>
+</div><!-- main -->
+<div id="side">
+  <div id="settings">
+     <div id="sethead">SETTINGS</div>
+     <div id="setcontent">
+<p>Visible range:
+<select id="range" onchange="changeRange()" tabindex="-1">
+<option selected="selected" value="60">60m</option>
+<option value="100">100m</option>
+<option value="150">150m</option>
+<option value="200">200m</option>
+<option value="300">300m</option>
+<option value="400">400m</option>
+</select><br/>(bigger range, longer to draw)</p>
+<p>Stride length in wood:
+<select id="stride" onchange="changeStride()" tabindex="-1">
+  <option value="5">5m</option>
+  <option value="4">4m</option>
+  <option selected="selected" value="3">3m</option>
+  <option value="2">2m</option>
+  <option value="1">1m</option>
+</select></p>
+<p><label>Orient the map: <input id="orient" type="checkbox" onchange="changeOrient()"/></label></p>
+<p id="mapSettings"></p>
+    </div><!-- setcontent -->
+  </div><!-- settings -->
+  <div id="symbols">
+    <div id="symhead">MAP SYMBOLS</div>
+    <canvas id="legend" width="200" height="230"></canvas>
+  </div>
+  <div id="extraButtons"></div>
+</div><!-- side -->
+<noscript>You must have scripting enabled in the browser for this page to work</noscript>
+<script>
+let im = new Image();
+let canvas = document.getElementById("map");
+let g2 = canvas.getContext("2d");
+im.onload = function () { g2.drawImage(im, 0, 0, 800, 600); };
+im.src = "im/Pof8_Title_800x600.png";
+
+function run()//onload
+{ g2.font = "bold 18px sans-serif";
+  g2.fillStyle = '#fff';
+  g2.fillText("Any key to start", 400, 560);
+  g2.fillText("or click this image", 390, 580);
+  document.addEventListener("keydown", start);
+  canvas.addEventListener("click", start);
+}
+
+function start(e)
+{ e.preventDefault();
+  document.removeEventListener("keydown", start);
+  canvas.removeEventListener("click", start);
+  g2.drawImage(im, 0, 0, 800, 600);
+  g2.font = "bold 32px sans-serif";
+  g2.strokeStyle = "#000";
+  g2.strokeText("LOADING ...", 400, 200);
+  setTimeout(init, 5);//in forestRA.js
+}
+</script>
+<script src="js/pointRA.js"></script>
+<script src="js/screenZZ.js"></script>
+<script src="js/workareaEH.js"></script>
+<script src="js/aroundES.js"></script>
+<script src="js/storageRA.js"></script>
+<script src="js/targetFB.js"></script>
+<script src="js/mapuiRA.js"></script>
+<script src="js/forestRA.js"></script>
+<script src="js/observerRA.js"></script>
+<script src="js/terrainRA.js"></script>
+<script src="js/mapRA.js"></script>
+<script src="js/scenepointET.js"></script>
+<script src="js/buildingRA.js"></script>
+<script src="js/sceneRA.js"></script>
+<script src="js/roadRA.js"></script>
+<script src="js/streamZZ.js"></script>
+<script src="js/mineRA.js"></script>
+<script src="js/minemapZY.js"></script>
+<script src="js/insideRA.js"></script>
+<script src="js/metersRA.js"></script>
+<script src="js/teleRA.js"></script>
+<script src="js/noticeRA.js"></script>
+</body>
+</html>

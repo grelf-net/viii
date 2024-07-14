@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- By Graham Relf. Made available for programmers to experiment with the ideas
+and improve on them. A link back to https://grelf.net would be appreciated. -->
+<head>
+<meta charset="utf-8">
+<meta name="application-name" content="Pieces of Eight">
+<meta name="author" content="Graham Relf">
+<meta name="description" content="A never-ending detailed map to explore. Designed to encourage pure HTML5/JavaScript creativity.">
+<meta name="keywords" content="terrain,simulation,exploration,map,contours,geography,HTML5,JavaScript">
+<title>Pieces of 8 TEST</title>
+<style>
+body {font-family:sans-serif;font-size:small;padding:0;margin:8px;background:#fff;color:#000}
+#main {width:890px;float:left;}
+#mainLeft {width:800px;height:695px;float:left;}
+#mainFoot {width:800px;padding:4px;float:left;}
+#canvas {width:800px;height:600px;}
+#belowCanvas {width:800px;height:110px;}
+#titleAndRole {font-size:larger;font-weight:bold;float:left;width:235px;}
+#title {color:#fff;background:#090;height:20px;padding:2px 8px;font-size:larger;font-weight:bold;}
+#roleDiv {margin-top:4px}
+#belowButtons {float:left;}
+#sideButtons {float:left;height:670px;}
+#side {float:left;margin-left:4px}
+#extraButtons {width:220px;margin:4px;}
+#symbols {border:2px solid #0bb14d;margin:4px;}
+#settings {border:2px solid #0bb14d;margin:4px;}
+#sethead,#symhead {background:#0bb14d;color:#fff;margin:0;text-align:center;font-weight:bold}
+#setcontent,#symcontent {padding:4px}
+#heli {background:#ccf;}
+#mapclick {position:fixed;left:10px;top:10px;width:170px;background:#eee;padding:0;visibility:hidden}
+#divtitle {margin:0;padding:8px;font-weight:bold;background:#393;color:#fff}
+#divbody {padding:8px}
+#draggable {font-size:smaller;font-weight:normal;float:right}
+.clear {clear:both;}
+.button {text-align:center;font-weight:bold;padding:16px;background:#ccc;border-top:4px solid #eee;border-left:4px solid #ddd;border-right:4px solid #888; border-bottom:4px solid #555;}
+#extraButtons .button {float:left;height:50px;width:30px}
+.belowButton {width:100px;height:56px;float:left;}
+.smallButton {width:30px;height:40px;float:left;}
+.sideButton {width:50px;height:90px;clear:both;}
+.swatch {padding:2px 8px;width:54px;margin:2px;text-align:center}
+</style>
+</head>
+<body onload="test()">
+  <div id="mapclick"></div>
+<div id="main">
+    <div id="mainLeft">
+        <div id="canvas">
+<canvas id="map" width="800" height="600" tabindex="1">
+The HTML5 canvas element is not recognised by this browser.<br/>
+</canvas><!-- tabindex enables the canvas to receive focus for keyboard events -->
+        </div>
+        <div id="belowCanvas">
+            <div id="titleAndRole"><span id="title">Pieces of Eight TEST</span>
+<div id="roleDiv">Role:
+<select id="role" onchange="changeRole()" tabindex="-1">
+<option value="E" selected>Explorer</option>
+<option value="A">Archaeologist</option>
+<option value="L">Locksmith</option>
+<option value="G">Engineer</option>
+<option value="M">Magician</option>
+<option value="P">Parachutist</option>
+<option value="R">Gangster</option>
+<option value="I">Pilot</option>
+</select>
+</div>
+            </div>
+            <div id="belowButtons"></div>
+        </div>
+    </div>
+    <div id="sideButtons"></div>
+  <div id="mainFoot">
+    <div id="info"></div>
+    <div id="results"></div>
+    <p id="footer">This game does not use cookies. Games are only saved locally in your browser</p> 
+  </div>
+</div><!-- main -->
+<div id="side">
+  <div id="settings">
+     <div id="sethead">SETTINGS</div>
+     <div id="setcontent">
+<p>Visible range:
+<select id="range" onchange="changeRange()" tabindex="-1">
+<option selected="selected" value="60">60m</option>
+<option value="100">100m</option>
+<option value="150">150m</option>
+<option value="200">200m</option>
+<option value="300">300m</option>
+<option value="400">400m</option>
+</select><br/>(bigger range, longer to draw)</p>
+<p>Stride length in wood:
+<select id="stride" onchange="changeStride()" tabindex="-1">
+  <option value="5">5m</option>
+  <option value="4">4m</option>
+  <option selected="selected" value="3">3m</option>
+  <option value="2">2m</option>
+  <option value="1">1m</option>
+</select></p>
+<p><label>Orient the map: <input id="orient" type="checkbox" onchange="changeOrient()"/></label></p>
+<p id="mapSettings"></p>
+    </div><!-- setcontent -->
+  </div><!-- settings -->
+  <div id="symbols">
+    <div id="symhead">MAP SYMBOLS</div>
+    <canvas id="legend" width="200" height="230"></canvas>
+  </div>
+  <div id="extraButtons"></div>
+</div><!-- side -->
+<noscript>You must have scripting enabled in the browser for this page to work</noscript>
+<script>
+var canvas = document.getElementById ("map");
+var g2 = canvas.getContext ("2d");
+g2.font = "bold 48px sans-serif";
+g2.strokeStyle = "#000";
+g2.strokeText ("LOADING ...", canvas.width / 2 - 70, canvas.height / 2);
+
+const TEST = {};// To hold test data
+
+function test()
+{ init();
+  TEST.teleNo = 0;  
+  document.removeEventListener("keydown", keydown);
+  document.addEventListener("keydown", testKeydown);
+}// test
+
+// Keys used so far in main program:
+// a, c, d, f, j, m, o, s, u, v, w, z, 0, +, =, -, ?, /, Enter, Esc, PgUp, PgDn, arrows
+// Keys used here:
+// b - test message function
+// e - set metal detector
+// g - test Terrain.findGoodSite() - see console log
+// h - set heli meter (no need to search)
+// i - toggle clipping flag in scene
+// k - experiment with SharedWorker to have 2 windows: scene & map
+// l - lower lakeHt to 20, to show mud
+// n - increment me.nPieces, showWin() when 8
+// p - got phone button
+// q - enter new (x, y)
+// r - set rgb meter (no need to search)
+// t - visit the tele sites (cyclic)
+// x - output saved games as JSON in the results div
+// y - load games JSON from text file saved by x and save in localStorage
+// \ - draw sea/land map at 16x scale
+function testKeydown(e)
+{ let me = forest.observer, ft = forest.terrain;
+  switch (e.key)
+  {
+case 'b':
+//    message(["This is a message", "with an array as", "first argument"], true);
+    message("This is a message", "with all lines as", "strings", true);
+    return;
+case 'e':
+    me.metalDet = new MetalDetector();
+    return;
+case 'g':
+    let x0 = random(0, 32000), y0 = random(0, 32000);
+    var xy = ft.findGoodSite(x0, y0, "testing");
+    console.log(xy);
+    if (xy.ok)
+    { me.x = xy.x, me.y = xy.y;
+      centreMapOnObserver();
+      console.log("Terrain: " + forest.terrain.terra(me.x, me.y).terrain);
+      let db = (new Point(x0, y0)).distanceAndBearing(xy);
+      console.log("distance & bearing: " + db.d.toFixed(1) + ", " + db.b.toFixed(1));
+    }
+    return;
+case 'h':
+    me.heliMeter = new HeliMeter();
+    return;
+case 'i':
+    forest.scene.clipping = !forest.scene.clipping;
+    if (forest.showing === "scene") redisplay();
+    return;
+case 'k':
+    forest.share = createShare();
+    return;
+case 'l':
+    ft.lakeHt = 20;
+    return;
+case 'n':
+    me.nPieces++;
+    if (me.nPieces >= 8) me.showWin();
+    return;
+case 'p':
+    let ps =
+{ kind:"extra",id:"phone",text:"Phone box",key:"?",alt:"/",func:nearestPhone,roles:"m" };
+    sceneButtons.push(ps);
+    mapButtons.push(ps);
+    me.phoneButton = true;
+    return;
+case 'q':
+    let sx = prompt("New x?");
+    let sy = prompt("New y?");
+    me.x = parseInt(sx);
+    me.y = parseInt(sy);
+    centreMapOnObserver();
+    return;
+case 'r':
+    me.rgbMeter = new RgbMeter();
+    return;
+case 't':// cycle through the tele sites
+    let pt = forest.tele.sites[TEST.teleNo];
+    me.x = pt.x - 16;
+    me.y = pt.y;
+    me.b = 90;
+    me.sincos();
+    centreMapOnObserver();
+    if (forest.sceneCache) delete forest.sceneCache;
+    document.getElementById("info").innerHTML = "Tele number " + TEST.teleNo +
+      " at (" + pt.x + ", " + pt.y + ")";
+    TEST.teleNo++;
+    if (TEST.teleNo >= forest.tele.sites.length) TEST.teleNo = 0;
+    let s1 = "i, x, y, placed, mx, my, placed, terra(x,y)<br>";
+    for (var i = 0; i < forest.tele.sites.length; i++)
+    { let ti = forest.tele.sites[i];
+      s1 += i + ", " + ti.x + ", " + ti.y + ", ";
+      let pd = ft.atPlace(ti.x, ti.y);
+      if (pd < 20) s1 += FEATURES.getName(pd);
+      else s1 += TERRAINS.getName(pd);
+      s1 += ", " + ti.mx + ", " + ti.my + ", ";
+      pd = ft.atPlace(ti.mx, ti.my);
+      if (pd < 20) s1 += FEATURES.getName(pd);
+      else s1 += TERRAINS.getName(pd);
+      let tr = ft.terra(ti.x, ti.y);
+      s1 += ", ht:" + (tr.height - ft.LAKE_HT0).toFixed(0);
+      s1 += ", terrain:" + TERRAINS.getName(tr.terrain);
+      s1 += ", feature:" + FEATURES.getName(tr.feature);
+      s1 += "<br>";
+    }
+    document.getElementById("results").innerHTML = s1;
+    return;
+case 'x':// all saved games -> JSON in results div
+    let s2 = "";
+    let nameList = localStorage.getItem('names');
+    if (null === nameList) return;
+    nameList = JSON.parse (nameList);
+    for (var i = 0; i < nameList.length; i++)
+    { s2 += nameList[i] + "<br>";
+      let game = localStorage.getItem(nameList[i]);
+      s2 += game + "<br>";
+    }
+    document.getElementById("results").innerHTML = s2;//Copy text from there (Firefox allows)
+    return;
+case 'y':// read text file saved from 'x' and save games in localStorage
+    let el = document.getElementById("results");
+    el.innerHTML = 'Text file: <input id="infile" type="file" onchange="readFile()">';
+    return;
+case '\\':
+    largeMap(16);
+    return;
+  }
+  keydown(e);// Other keys as normal
+}// testKeydown
+
+////'y' processing:
+function readFile()//JSON, saved games
+{ let files = document.getElementById("infile").files;
+  if (files.length > 0)
+  { let reader = new FileReader();
+    reader.addEventListener("load", () => { saveLoaded(reader.result); }, false);
+    reader.readAsText(files[0]);
+  }
+  else message("File not found");
+} // readFile
+
+function saveLoaded(jsonString)
+{ document.getElementById("results").innerHTML = jsonString; // FOR NOW
+  let names = [], objects = [], lf = '\u000a', i0 = 0, i1;
+  do
+  { i1 = jsonString.indexOf(lf, i0);
+    if (i1 > i0) names.push(jsonString.substring(i0, i1).trim());
+    { i0 = i1 + 1;
+      i1 = jsonString.indexOf(lf, i0);
+      if (i1 > i0)
+      { objects.push(jsonString.substring(i0, i1).trim());
+        i0 = i1;
+  } } }
+  while (i1 > i0);
+  if (names.length !== objects.length) message("ERROR", "Unequal no of", "names and objects", true);
+  for (let i = 0; i < names.length; i++)
+  { let name = names[i], nameList = getNameList(), ok = true;
+    for (let j = 0; j < nameList.length; j++)
+    { if (nameList[j] === name)
+      { if (confirm("There is already a saved\ngame called " + name + "\n\nOVERWRITE?"))
+        { nameList.splice(j, 1);
+        }
+        else ok = false;
+    } }
+    if (ok)
+    { localStorage.setItem(name, objects[i]);//already stringified
+      nameList.push(name);
+      localStorage.setItem('names', JSON.stringify(nameList));
+      message ("Game saved as", name, "in your browser", true);
+} } }
+////:'y' processing
+
+function largeMap(scale)
+{ let fs = forest.screen, ft = forest.terrain, me = forest.observer;
+  let x0 = me.x - scale * fs.wd / 2, y0 = me.y + scale * fs.ht / 2;
+  let land = [200, 255, 200, 255], sea = forest.map.BLUE;
+  for (let iy = 0, y = y0; iy < fs.ht; iy++, y -= scale)
+  { for (let ix = 0, x = x0; ix < fs.wd; ix++, x += scale)
+    { if (ft.calcHeight(x, y) > ft.lakeHt) fs.setPixel(ix, iy, land);
+      else fs.setPixel(ix, iy, sea);
+  } }
+  fs.display();
+}
+
+function createShare()
+{ if (!SharedWorker)
+  { console.log("Cannot share data with another instance");
+    return;
+  }
+  let w = new SharedWorker("js/shareRA.js");
+  w.port.addEventListener('message', function(e) 
+  { console.log(e.data);
+    let me = forest.observer, ft = forest.terrain;
+    if (e.data.startsWith("C:"))
+    { if (1 === parseInt(e.data.substring(2)))// 1st instance
+      { w.port.postMessage("setP:" + JSON.stringify(ft.PROFILE));
+        w.port.postMessage("setO:" + JSON.stringify({x:me.x, y:me.y, b:me.b}));
+      }
+      else// start with same terrain & position as 1st
+      { w.port.postMessage("getP");
+        w.port.postMessage("getO");
+    } }
+    else if (e.data.startsWith("P:"))
+    { ft.PROFILE = JSON.parse(e.data.substring(2));
+      redisplay();
+    }
+    else if (e.data.startsWith("O:"))
+    { let o = JSON.parse(e.data.substring(2));
+      me.x = o.x; me.y = o.y; me.b = o.b;
+      centreMapOnObserver();
+      redisplay();
+    }
+  }, false);
+  w.port.start();
+  return w.port;
+}
+</script>
+<script src="js/pointRA.js"></script>
+<script src="js/screenZZ.js"></script>
+<script src="js/workareaEH.js"></script>
+<script src="js/aroundES.js"></script>
+<script src="js/storageRA.js"></script>
+<script src="js/targetFB.js"></script>
+<script src="js/mapuiRA.js"></script>
+<script src="js/forestRA.js"></script>
+<script src="js/observerRA.js"></script>
+<script src="js/terrainRA.js"></script>
+<script src="js/mapRA.js"></script>
+<script src="js/scenepointET.js"></script>
+<script src="js/buildingRA.js"></script>
+<script src="js/sceneRA.js"></script>
+<script src="js/roadRA.js"></script>
+<script src="js/streamZZ.js"></script>
+<script src="js/mineRA.js"></script>
+<script src="js/minemapZY.js"></script>
+<script src="js/insideRA.js"></script>
+<script src="js/metersRA.js"></script>
+<script src="js/teleRA.js"></script>
+<script src="js/noticeRA.js"></script>
+</body>
+</html>
